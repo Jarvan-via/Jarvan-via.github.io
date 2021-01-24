@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Yuan Blog</title>
+    <description>这里是 @Yuan的博客,与你一起发现更大的世界。</description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Tue, 29 Sep 2020 20:30:53 +0800</pubDate>
+    <lastBuildDate>Tue, 29 Sep 2020 20:30:53 +0800</lastBuildDate>
+    <generator>Jekyll v3.9.0</generator>
+    
+      <item>
+        <title>Django项目的发布</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;什么季节观什么景，什么时令赏什么花，这才是完整和自然&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;本文将nginx、WSGI、uwsgi、uWSGI、django这几个关系梳理一下。&lt;/p&gt;
+
+&lt;h3 id=&quot;wsgi&quot;&gt;wsgi&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;全称web server gateway interface&lt;/strong&gt;，&lt;/p&gt;
+
+&lt;p&gt;wsgi不是服务器，也不是python模块，只是一种协议，描述web server如何和web application通信的规则。
+运行在wsgi上的web框架有bottle，flask，django
+uwsgi    和wsgi一样是通信协议，是uWSGI服务器的单独协议，用于定义传输信息的类型&lt;/p&gt;
+
+&lt;p&gt;uWSGI    是一个web服务器，实现了WSGI协议，uwsgi协议。a
+nginx    web服务器，更加安全，更好的处理处理静态资源，缓存功能，负载均衡，因此nginx的强劲性能，配合uWSGI服务器会更加安全，性能有保障。
+django 高级的python web框架，用于快速开发，解决web开发的大部分麻烦，程序员可以更专注业务逻辑，无须重新造轮子
+逻辑图&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;web服务器&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;传统的c/s架构，请求的过程是
+客户端 &amp;gt; 服务器 
+服务器 &amp;gt; 客户端
+服务器就是：1.接收请求 2.处理请求 3.返回响应
+web框架层&lt;/p&gt;
+
+&lt;p&gt;HTTP的动态数据交给web框架，例如django遵循MTV模式处理请求。
+HTTp协议使用url定位资源，urls.py将路由请求交给views视图处理，然后返回一个结果，完成一次请求。
+web框架使用者只需要处理业务的逻辑即可。
+如果将一次通信转化为“对话”的过程&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Nginx：hello wsgi，我刚收到一个请求，你准备下然后让django来处理吧&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;WSGI：好的nginx，我马上设置环境变量，然后把请求交给django&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Django：谢谢WSGI，我处理完请求马上给你响应结果&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;WSGI：好的，我在等着&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Django：搞定啦，麻烦wsgi吧响应结果传递给nginx&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;WSGI：太棒了，nginx，响应结果请收好，已经按照要求传递给你了&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;nginx：好滴。我把响应交给用户。合作愉快&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h3 id=&quot;django-nginxuwsgi-安装配置&quot;&gt;Django Nginx+uwsgi 安装配置&lt;/h3&gt;
+
+&lt;p&gt;正式发布的服务，需要一个可以稳定而持续的服务器。&lt;/p&gt;
+&lt;h4 id=&quot;环境的搭建&quot;&gt;环境的搭建&lt;/h4&gt;
+&lt;p&gt;&lt;strong&gt;基础开发环境配置&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;yum groupinstall &quot;Development tools&quot;
+yum install zlib-devel bzip2-devel pcre-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;提前安装好python3环境&lt;/strong&gt;
+https://www.cnblogs.com/yyyyyyyyyy/p/9463387.html&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;virtualenv&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;请确保你的虚拟环境正常工作
+http://blog.pythoner.world/2018/08/30/Virtualenv/&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;安装django1.11&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;pip3 install django==1.11
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;创建django项目mysite&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;django-admin startproject mysite **创建app01**
+
+python3 manage.py startapp app01
+mysite/settings.py
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;settings.py 设置&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ALLOWED_HOSTS = ['*']
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;mysite/urls.py&lt;/strong&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-python&quot;&gt;from app01 import views
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+    url(r'^hello_django/', views.hello),
+]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;views.py&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;language-python&quot;&gt;from django.shortcuts import render,HttpResponse
+def hello(request):
+    print('request is :',request)
+    return HttpResponse('django is ok ')
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id=&quot;安装uwsgi&quot;&gt;安装uWSGI&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;进入虚拟环境venv，安装uwsgi&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;(venv) [root@slave 192.168.11.64 /opt]$pip3 install uwsgi
+检查uwsgi版本
+(venv) [root@slave 192.168.11.64 /opt]$uwsgi --version
+2.0.17.1 **检查uwsgi python版本**
+
+uwsgi --python-version
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;运行简单的uWSGI&lt;/strong&gt;
+启动一个python&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;uwsgi --http :8000 --wsgi-file test.py
+http :8000: 使用http协议，端口8000
+wsgi-file test.py: 加载指定的文件，test.py test.py ```python def application(env, start_response):
+start_response('200 OK', [('Content-Type','text/html')])
+return [b&quot;Hello World&quot;] # python3 ``` ### uWsgi热加载python程序
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;在启动命令后面加上参数&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;uwsgi --http :8088 --module mysite.wsgi --py-autoreload=1  **发布命令**
+
+command= /home/venv/bin/uwsgi --uwsgi 0.0.0.0:8000 --chdir /opt/mysite --home=/home/venv --module mysite.wsgi
+#此时修改django代码，uWSGI会自动加载django程序，页面生效
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;运行django程序&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;#mysite/wsgi.py  确保找到这个文件
+uwsgi --http :8000 --module mysite.wsgi
+module mysite.wsgi: 加载指定的wsgi模块 **uwsgi配置文件**
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;uwsgi.ini
+指定配置文件启动命令&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;uwsgi --ini  /etc/uwsgi_nginx.ini **配置nginx结合uWSGI**
+
+配置nginx.conf ``` worker_processes  1; error_log  logs/error.log; pid        logs/nginx.pid; events {
+worker_connections  1024; } http {
+include       mime.types;
+default_type  application/octet-stream;
+log_format  main  '$remote_addr - $remote_user [$time_local] &quot;$request&quot; '
+                  '$status $body_bytes_sent &quot;$http_referer&quot; '
+                  '&quot;$http_user_agent&quot; &quot;$http_x_forwarded_for&quot;';
+access_log  logs/access.log  main;
+sendfile        on;
+keepalive_timeout  65; 　　　#nginx反向代理uwsgi
+server {
+    listen       80;
+    server_name  192.168.11.64;
+    location / {
+     include  /opt/nginx1-12/conf/uwsgi_params;
+     uwsgi_pass 0.0.0.0:8000;
+        root   html;
+        index  index.html index.htm;
+    } 　　　　  #nginx处理静态页面资源 　　　　  location /static{ 　　　　　　　　alias /opt/nginx1-12/static;　　　
+     } 　　　　　#nginx处理媒体资源 　　　　　location /media{ 　　　　　　　　alias /opt/nginx1-12/media;　　　
+     }
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   html;
+    }
+} } ``` 配置完启动nginx
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;supervisor&quot;&gt;supervisor&lt;/h3&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;supervisor 是基于 python 的任务管理工具，用来自动运行各种后台任务，当然你也能直接利用 nohup 命令使任务自动后台运行，但如果要重启任务，每次都自己手动 kill 掉任务进程，这样很繁琐，而且一旦程序错误导致进程退出的话，系统也无法自动重载任务。&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;这里要配置基于virtualenv的supervisor&lt;/p&gt;
+
+&lt;p&gt;由于supervisor在python3下无法使用，因此只能用python2去下载！！！！！！&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;注意此时已经退出虚拟环境了！！！！！&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;yum install python-setuptools
+easy_install supervisor
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;通过命令生成supervisor的配支文件&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;echo_supervisord_conf &amp;gt; /etc/supervisord.conf
+然后再/etc/supervisord.conf末尾添加上如下代码！！！！！！
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;pre&gt;&lt;code&gt;[program:my]
+#command=/opt/venv/bin/uwsgi --ini  /etc/uwsgi_nginx.ini  #这里是结合virtualenv的命令 和supervisor的精髓！！！！
+command= /home/venv/bin/uwsgi --uwsgi 0.0.0.0:8000 --chdir /opt/mysite --home=/home/venv --module mysite.wsgi
+#--home指的是虚拟环境目录  --module找到 mysite/wsgi.py
+
+directory=/opt/mysite
+startsecs=0
+stopwaitsecs=0
+autostart=true
+autorestart=true
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;最后启动supervisor，完成uWSGI启动django，nginx反向代理&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;supervisord -c /etc/supervisord.conf #启动supervisor
+supervisorctl -c /etxc/supervisord.conf restart my  #重启my项目
+supervisorctl -c /etc/supervisord.conf [start|stop|restart] [program-name|all] **重新加载supervisor**
+
+一、添加好配置文件后
+
+二、更新新的配置到supervisord    
+
+supervisorctl update
+三、重新启动配置中的所有程序
+
+supervisorctl reload
+四、启动某个进程(program_name=你配置中写的程序名称)
+
+supervisorctl start program_name    
+五、查看正在守候的进程
+
+supervisorctl
+六、停止某一进程 (program_name=你配置中写的程序名称)
+
+pervisorctl stop program_name
+七、重启某一进程 (program_name=你配置中写的程序名称)
+
+supervisorctl restart program_name
+八、停止全部进程
+
+supervisorctl stop all
+注意：显示用stop停止掉的进程，用reload或者update都不会自动重启。
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&quot;django的静态文件与nginx配置&quot;&gt;django的静态文件与nginx配置&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;mysite/settings.py&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;STATIC_ROOT='/opt/nginx1-12/static'
+STATIC_URL = '/static/'
+STATICFILES_DIRS=[
+    os.path.join(BASE_DIR,&quot;static&quot;),
+]
+上述的参数STATIC_ROOT用在哪？
+
+通过python3 manage.py collectstatic 收集所有你使用的静态文件保存到STATIC_ROOT！
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;STATIC_ROOT 文件夹&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;是用来将所有STATICFILES_DIRS中所有文件夹中的文件，以及各app中static中的文件都复制过来
+把这些文件放到一起是为了用nginx等部署的时候更方便&lt;/p&gt;
+</description>
+        <pubDate>Thu, 20 Sep 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2018/09/20/uwsgi-nginx/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/09/20/uwsgi-nginx/</guid>
+        
+        <category>Linux</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Jekyll+Github搭建博客教程</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;能快乐旅行的人，一定是轻装旅行的人&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;前言&quot;&gt;前言&lt;/h2&gt;
+&lt;p&gt;应广大的网友(装逼~~哈哈)要求，决定写个Jekyll+Giuhub搭建博客的教程，以便帮助更多的人，毕竟我也是这么过来的。这是&lt;a href=&quot;http://blog.pythoner.world/&quot;&gt;我的博客地址&lt;/a&gt;,可以先看看效果。
+首先介绍一下Jekyll这个框架，这个框架是Ruby语言一个基于静态文件的框架，因为不需要数据库，直接用静态文件来渲染，再加上有Github的支持所以成了搭建博客的不二之选。目前支持Markdown和
+&lt;a href=&quot;http://textile.sitemonks.com/&quot;&gt;Textile&lt;/a&gt;两种格式的文件。但是当你的博客写的越多的时候加载的就越慢，所以这就是静态文件的缺点。但是和他的优点比起来，这完全可以忽略不计。那废话不多说，咱们开干！！&lt;/p&gt;
+&lt;h2 id=&quot;正文&quot;&gt;正文&lt;/h2&gt;
+&lt;h3 id=&quot;1准备环境&quot;&gt;1.准备环境&lt;/h3&gt;
+&lt;h5 id=&quot;linu环境的搭建-我的是centos68&quot;&gt;&lt;strong&gt;linu环境的搭建&lt;/strong&gt; (我的是CentOS6.8)&lt;/h5&gt;
+&lt;p&gt;&lt;strong&gt;安装Ruby&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ yum install ruby **查看ruby版本**
+
+$ ruby -v
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;输出&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ruby 2.0.0p648 (2015-12-16) [x86_64-linux] jekyll 最新版要求 ruby 2.2或更高,所以更新ruby 这里我使用rvm更新ruby
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;安装rvm&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+$ curl -sSL https://get.rvm.io | bash -s stable
+$ source ~/.bashrc
+$ source ~/.bash_profile
+$ source /etc/profile.d/rvm.sh **修改rvm 的镜像到国内**
+
+$ echo &quot;ruby_url=https://cache.ruby-china.org/pub/ruby&quot; &amp;gt; /usr/local/rvm/user/db **注意这里可能提示找不到/usr/local/rvm/user/db这个文件夹，所以你得自己用find命令找一下看你的这个rvm/user/db在哪里**
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;安装Ruby 2.4&lt;/strong&gt;&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;jekyll 最新版要求 ruby 2.3所以保险起见咱们直接安装2.4
+你还可以更新到更高版本，可以用 $ rvm list known 查看当前各个操作系统可以安装的所有版本&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;pre&gt;&lt;code&gt;$ rvm install 2.4
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;gem在中国不好使, 万能的中国Ruby社区给我们搭建了gem镜像&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;移除gem默认仓库地址并添加中国的仓库&lt;/p&gt;
+
+    &lt;p&gt;$ gem sources –remove https://rubygems.org/
+  $ gem source -a https://gems.ruby-china.com/&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;2安装jekyll--启动&quot;&gt;2.安装jekyll &amp;amp; 启动&lt;/h3&gt;
+&lt;p&gt;&lt;strong&gt;安装&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ gem install jekyll
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;安装好好了以后，到这一步我们已经成功一大半了。
+我们这时候就要创建一个博客看一看了，这里有两种方式&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;1.方法一&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;在当前目录创建一个博客目录,并进入到目录&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $ jekyll new myblog
+$ cd myblog
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;启动我们的博客&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$ jekyll serve --host 0.0.0.0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如果不出意外, 启动是失败的, 错误信息应该类似于:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/usr/local/rvm/rubies/ruby-2.1.10/lib/ruby/site_ruby/2.1.0/rubygems/core_ext/kernel_require.rb:55:in `require': cannot load such file -- bundler (LoadError)
+from /usr/local/rvm/rubies/ruby-2.1.10/lib/ruby/site_ruby/2.1.0/rubygems/core_ext/kernel_require.rb:55:in `require'
+from /usr/local/rvm/gems/ruby-2.1.10/gems/jekyll-3.6.2/lib/jekyll/plugin_manager.rb:48:in `require_from_bundler'
+from /usr/local/rvm/gems/ruby-2.1.10/gems/jekyll-3.6.2/exe/jekyll:11:in `&amp;lt;top (required)&amp;gt;'
+from /usr/local/rvm/gems/ruby-2.1.10/bin/jekyll:23:in `load'
+from /usr/local/rvm/gems/ruby-2.1.10/bin/jekyll:23:in `&amp;lt;main&amp;gt;'
+from /usr/local/rvm/gems/ruby-2.1.10/bin/ruby_executable_hooks:15:in `eval'
+from /usr/local/rvm/gems/ruby-2.1.10/bin/ruby_executable_hooks:15:in `&amp;lt;main&amp;gt;' - 解决办法如下: - 安装bundle
+
+    $ gem install bundle
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;再次执行&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    $  jekyll serve --host 0.0.0.0 输出
+
+Configuration file: /usr/local/test/myblog/_config.yml
+            Source: /usr/local/test/myblog
+       Destination: /usr/local/test/myblog/_site
+ Incremental build: disabled. Enable with --incremental
+      Generating... 
+                    done in 0.427 seconds.
+ Auto-regeneration: enabled for '/usr/local/test/myblog'
+    Server address: http://0.0.0.0:4000/
+  Server running... press ctrl-c to stop.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img2018.cnblogs.com/blog/1341394/201809/1341394-20180916221005308-620348891.png&quot; alt=&quot;&quot; /&gt;
+OK这样我们就起了一个Jekyll
+server的博客，但是这种是系统默认的主题，既然我说这是方法一那肯定就还有方法二对吧&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;方法2:自定义主题&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;在&lt;a href=&quot;http://jekyllthemes.org/&quot;&gt;Jekyll主题&lt;/a&gt;上，我们可以选择自己喜欢的主题，我自己随便选一个给大家演示一下&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img2018.cnblogs.com/blog/1341394/201809/1341394-20180916221556854-33693130.png&quot; alt=&quot;image&quot; /&gt;
+下载，解压到linux
+CD到我们解压的文件夹&lt;/p&gt;
+
+&lt;p&gt;执行命令&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;jekyll server --host 0.0.0.0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这时候不出意外会报错&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;    Could not find proper version of jekyll (3.4.0) in any of the sources
+Run `bundle install` to install missing gems.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;但是提示也很明显，直接&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;bundle install OK,再来执行
+
+jekyll server --host 0.0.0.0
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;访问地址&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img2018.cnblogs.com/blog/1341394/201809/1341394-20180916223806195-1106220497.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这里贴一下启动时候的一些命令参数 &lt;a href=&quot;https://www.jekyll.com.cn/docs/usage/&quot;&gt;请猛击这里&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;好了，这样我们就可以实现定制我们自己的博客主题了。&lt;/p&gt;
+&lt;h2 id=&quot;3绑定github主页关键的一步&quot;&gt;3.绑定Github主页，关键的一步&lt;/h2&gt;
+&lt;p&gt;这里就需要一点Git基础了，若有不会的也不打紧，因为这里都是些简单的操作。&lt;/p&gt;
+
+&lt;h5 id=&quot;1先注册github账号这个我就不贴图了&quot;&gt;1.先注册Github账号，这个我就不贴图了&lt;/h5&gt;
+&lt;h5 id=&quot;2创建一个仓库&quot;&gt;2.创建一个仓库&lt;/h5&gt;
+
+&lt;p&gt;仓库名必须是:你的github账号名.github.io
+&lt;img src=&quot;https://img2018.cnblogs.com/blog/1341394/201809/1341394-20180916233242919-1817654277.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+&lt;h5 id=&quot;3然后在回到我们linux上我们在jekyll上下载的那个主题文件夹下进行git操作&quot;&gt;3.然后在回到我们linux上，我们在Jekyll上下载的那个主题文件夹下，进行git操作&lt;/h5&gt;
+&lt;p&gt;如果Linux上没有git的请安装Git&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;yum install git 然后CD到我们之前下载的文件夹下
+
+git init
+git add .
+git commit -m '第一次'
+git remote add origin https://github.com/你的账号/刚刚新建的仓库名.git
+git push origin master  这样操作成功之后，我们就可以访问 **h ttps://你的账号.github.io** 就可以看到我们之前的画面了，好了一个Jekyll+Github的博客算是搭起来了。
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&quot;4写博客&quot;&gt;4.写博客&lt;/h2&gt;
+&lt;p&gt;有了博客网站，就到了最后“最难”的一部分了——写博客。。
+推荐先将博客项目从github上clone到windows环境，然后再慢慢写，然后再push到Github上看效果，调试。这样虽然麻烦点，但是绝对比你在Linux上调试要方便的多，之所以前面让大家搭建Linux环境，只是想让大家知道如何去自定义一个原生的Jekyll server 版的博客。如果在push后出现构建Github Pages错误的问题，GitHub 会向你的账户发送邮件。
+或者直接打开自己的github的仓库主页查看settings选项，会有显示那个页面报错，具体哪一行，这个功能大家一定要记得，因为后面的调试会经常遇到。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;那么我们还是先看目录说明&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://img2018.cnblogs.com/blog/1341394/201809/1341394-20180917000226789-1276578933.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;这里特意强调一下这个_post目录，和_config.yml文件&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;_post目录&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;_posts目录就是专门存放博客文件的，你可以使用markdown或者Textile格式的文件来写博客，我个人是用markdown格式写的。但是不管是哪种格式的文件都需要包含 YAML 头信息， Jekyll 才会把它当做一个特殊的文件来处理。
+在_posts目录下新建一个markdown文件，头信息必须在文件的开始部分，并且需要按照 YAML 的格式写在两行三虚线之间。如下所示：
+&lt;img src=&quot;https://img2018.cnblogs.com/blog/1341394/201809/1341394-20180917000025742-958142107.png&quot; alt=&quot;image&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;_config.yml文件&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Jekyll 有这非常灵活和强大的配置功能，既可以在网站根目录下的 _config.yml 文件中进行配置，也可以作为命令行参数来配置。默认配置大致如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt; title: Your awesome title
+ email: your-email@example.com description: &amp;gt;- # this means to ignore newlines until &quot;baseurl:&quot;
+  
+ baseurl: &quot;&quot; # the subpath of your site, e.g. /blog
+ url: &quot;&quot; # the base hostname &amp;amp; protocol for your site, e.g. http://example.com
+ twitter_username: jekyllrb
+ github_username:  jekyll
+
+ # Build settings
+ markdown: kramdown
+ theme: minima
+ plugins:
+   - jekyll-feed
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;yml文件使用了YAML语法，如果想更好的理解Jekyll就需要了解一下YAML语法的内容，这里引用一下阮一峰老师写的一篇&lt;a href=&quot;http://www.ruanyifeng.com/blog/2016/07/yaml.html&quot;&gt;YAML语法教程&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;一般来说_config.yml的默认内容不需要太大改动，只需要往里面添加你需要的自定义属性，然后你就可以在页面模板中使用site.属性名来取得对应的值，例如site.title的值就是Your awesome title。
+一般主题中也会自动帮你写好这些自定义属性，搭建你自己的博客时你只需要将这些自定义属性改为你想要的值即可。&lt;/p&gt;
+
+&lt;p&gt;若是上面的知识不足以让你写出满意的博客，所以这里我强烈推荐&lt;a href=&quot;https://www.jekyll.com.cn/&quot;&gt;Jekyll中文文档&lt;/a&gt;，这个文档写的很好，并且还是中文的可以说是非常友好了，我相信你读了文档之后，对Jekyll语法，目录结构肯定都有了一个很好的理解。&lt;/p&gt;
+
+&lt;h2 id=&quot;5终极绝招&quot;&gt;5.终极绝招&lt;/h2&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;要放大招了。哈哈哈哈&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;我既然说是全网最全的Jekyll搭建博客教程，万一上面的你都不会，Linux环境也搭建不起来，那该如何是好，别急，这就告诉你绝招！！！&lt;/p&gt;
+&lt;h4 id=&quot;首先你还是得有giuhub账号&quot;&gt;首先你还是得有Giuhub账号&lt;/h4&gt;
+&lt;p&gt;直接到github上去Fork别人已经搭建好的代码(友情提示，Fork记得给Star，也算是尊重原创)，我是Fork的&lt;a href=&quot;http://huangxuan.me/&quot;&gt;黄玄大佬&lt;/a&gt;的，&lt;a href=&quot;https://github.com/Huxpro/huxpro.github.io&quot;&gt;代码仓库&lt;/a&gt;在这里。fork到自己的代码仓库之后，把仓库名字按照我上面的教程改过来，然后访问&lt;strong&gt;h ttps://你的账号.github.io&lt;/strong&gt;，就可以看到和大佬一模一样的博客，就问你激不激动。~~~接下来你要做的就是修改配置文件，然后后把_POST文件夹的文件都删掉，把自己写的Markdown文件放进去。但是删之前请看下别人的模板，这样有助于更好的理解语法。详细的说明还是看他的仓库的README吧，写的很清楚，并且也有中文版的。以后若是再遇到好看的模板如法炮制即可！&lt;/p&gt;
+
+&lt;p&gt;这种方法，既不需要上面Linux环境，直接一个Fork搞定，是不是很爽。哈哈&lt;/p&gt;
+
+&lt;p&gt;但是会万一哪天你想自己搭建，那不会Linux环境下的操作可是不行的，所以会Linux环境下的原生Jekyll还是有用的老铁。&lt;/p&gt;
+
+&lt;p&gt;OK，教程就写到这里，溜了溜了。。&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 15 Sep 2018 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2018/09/15/jekyll-teach/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/09/15/jekyll-teach/</guid>
+        
+        <category>Jekyll</category>
+        
+        
+      </item>
+    
+      <item>
+        <title>Hello Myblog</title>
+        <description>&lt;blockquote&gt;
+  &lt;p&gt;“Let’s do it . ”&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&quot;前言&quot;&gt;前言&lt;/h2&gt;
+&lt;p&gt;程序员写东西分三个阶段:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;第一阶段&lt;/strong&gt;:就是自己平时遇到什么问题,通过搜索解决了之后记一下笔记。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;第二阶段&lt;/strong&gt;:平时遇到问题去搜索的时候看到别人写的博客，心里会想我也能写啊，所以就直接就去注册了个博客账号，写了一些博客，偶尔有人来评论，涨个粉，又或者偶尔上个首页，心里一阵窃喜。哈哈~~~自己也是大牛了。很多人就停留在了这个阶段 ~~&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;第三阶段&lt;/strong&gt;:过了好久，有一部分人又有想法了，觉得现在的博客样式都一样的，不够个性(当然现在也有一些博客可以实现定制了，比如博客园等等)，无法满足自己的需求。所以就想着自己亲自搭建一个吧。&lt;/p&gt;
+
+&lt;h2 id=&quot;正文&quot;&gt;正文&lt;/h2&gt;
+&lt;p&gt;以上三个阶段都是我的亲身经历的，我个人也在&lt;a href=&quot;https://www.cnblogs.com/yyyyyyyyyy/&quot;&gt;博客园&lt;/a&gt;写了一段时间的博客，分享自己的技术，也有过上首页，涨粉的经历。到最后还是觉得应该自己写个博客，程序员嘛，能自己造轮子就自己造对吧。因为自己是一个Python的Web开发程序员，所以自己一开始用Django+Bootstrap搭建了一个博客，也在服务器上跑了起来，当时还是很得意。。。自己也是搭建了个人博客的人了，但是毕竟自己是后端程序员，审美上还是差了点。跟别人的一比感觉自己写的太LOW。然而有一次在逛&lt;a href=&quot;https://www.v2ex.com/&quot;&gt;V2EX&lt;/a&gt;的时候我偶然看到了有人推荐&lt;a href=&quot;https://note.youdao.com/&quot;&gt;黄玄大佬&lt;/a&gt;的博客,
+不得不说当时确实惊到我了，最后看了一大佬下的履历，原来是FaceBook的大佬，失敬失敬~~~我就直接Fork了大佬的&lt;a href=&quot;https://github.com/Huxpro/huxpro.github.io&quot;&gt;Giuhub&lt;/a&gt;拿来用了。&lt;/p&gt;
+
+&lt;p&gt;如果感兴趣的请直接移步到大佬的&lt;a href=&quot;https://github.com/Huxpro/huxpro.github.io&quot;&gt;Giuhub&lt;/a&gt;，README写的也挺清晰的，不过提醒下，得有Git基础，这样上手比较快。另外推荐读下&lt;a href=&quot;https://www.jekyll.com.cn/docs/installation/&quot;&gt;Jekyll文档&lt;/a&gt;，这样会更容易理解一些原理性的东西，当然肯定还是会遇到些坑的，如果遇到了无法解决的问题请加我
+&lt;a href=&quot;http://http://localhost:4000/img/weixin.jpg&quot;&gt;微信&lt;/a&gt;，一起讨论交流。&lt;/p&gt;
+
+&lt;h2 id=&quot;后记&quot;&gt;后记&lt;/h2&gt;
+
+&lt;p&gt;回顾自己从开始看到别人的博客到自己完完全全搭建好，再把自己博客园上的博客重新整理成MD的形式，到展示在现在博客上。自己终于也可以有个地方写写东西，其实写东西的过程也是自己总结的过程，把自己平时零碎的知识整理一下，搭建自己的知识库。只有当你想把一个知识说清楚的时你才知道自己是不是真的搞懂了，并掌握了。当然也并不局限于技术文章，只要是自己的想法，都可以写上去。&lt;/p&gt;
+
+&lt;p&gt;如果你恰好逛到了这里，希望你也能喜欢这个博客主题。&lt;/p&gt;
+
+&lt;p&gt;—— Yuan 后记于 2018.09&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 01 Sep 2018 20:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2018/09/01/Hello-Myblog/</link>
+        <guid isPermaLink="true">http://localhost:4000/2018/09/01/Hello-Myblog/</guid>
+        
+        <category>生活</category>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

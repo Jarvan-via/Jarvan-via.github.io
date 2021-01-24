@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="这里是 @Yuan的博客,与你一起发现更大的世界。">
+    <meta name="keywords"  content="袁勇, Yuan, 个人博客, 个人网站, 互联网, Web, JavaScript">
+    <meta name="theme-color" content="#000000">
+    
+    <title>Django项目的发布 - 阿袁的博客 | Yuan Blog</title>
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/pwa/manifest.json">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/img/ifavicon.ico">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="http://localhost:4000/2018/09/20/uwsgi-nginx/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Yuan Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/9.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/9.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Linux" title="Linux">Linux</a>
+                        
+                    </div>
+                    <h1>Django项目的发布</h1>
+                    
+                    
+                    <h2 class="subheading">nginx+uWSGI+django+virtualenv+supervisor发布web服务器</h2>
+                    
+                    <span class="meta">Posted by Yuan on September 20, 2018</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+                <!-- Multi-Lingual -->
+                
+
+				<blockquote>
+  <p>什么季节观什么景，什么时令赏什么花，这才是完整和自然</p>
+</blockquote>
+
+<p>本文将nginx、WSGI、uwsgi、uWSGI、django这几个关系梳理一下。</p>
+
+<h3 id="wsgi">wsgi</h3>
+<p><strong>全称web server gateway interface</strong>，</p>
+
+<p>wsgi不是服务器，也不是python模块，只是一种协议，描述web server如何和web application通信的规则。
+运行在wsgi上的web框架有bottle，flask，django
+uwsgi    和wsgi一样是通信协议，是uWSGI服务器的单独协议，用于定义传输信息的类型</p>
+
+<p>uWSGI    是一个web服务器，实现了WSGI协议，uwsgi协议。a
+nginx    web服务器，更加安全，更好的处理处理静态资源，缓存功能，负载均衡，因此nginx的强劲性能，配合uWSGI服务器会更加安全，性能有保障。
+django 高级的python web框架，用于快速开发，解决web开发的大部分麻烦，程序员可以更专注业务逻辑，无须重新造轮子
+逻辑图</p>
+
+<p><strong>web服务器</strong></p>
+
+<p>传统的c/s架构，请求的过程是
+客户端 &gt; 服务器 
+服务器 &gt; 客户端
+服务器就是：1.接收请求 2.处理请求 3.返回响应
+web框架层</p>
+
+<p>HTTP的动态数据交给web框架，例如django遵循MTV模式处理请求。
+HTTp协议使用url定位资源，urls.py将路由请求交给views视图处理，然后返回一个结果，完成一次请求。
+web框架使用者只需要处理业务的逻辑即可。
+如果将一次通信转化为“对话”的过程</p>
+
+<blockquote>
+  <p>Nginx：hello wsgi，我刚收到一个请求，你准备下然后让django来处理吧</p>
+</blockquote>
+
+<blockquote>
+  <p>WSGI：好的nginx，我马上设置环境变量，然后把请求交给django</p>
+</blockquote>
+
+<blockquote>
+  <p>Django：谢谢WSGI，我处理完请求马上给你响应结果</p>
+</blockquote>
+
+<blockquote>
+  <p>WSGI：好的，我在等着</p>
+</blockquote>
+
+<blockquote>
+  <p>Django：搞定啦，麻烦wsgi吧响应结果传递给nginx</p>
+</blockquote>
+
+<blockquote>
+  <p>WSGI：太棒了，nginx，响应结果请收好，已经按照要求传递给你了</p>
+</blockquote>
+
+<blockquote>
+  <p>nginx：好滴。我把响应交给用户。合作愉快</p>
+</blockquote>
+
+<h3 id="django-nginxuwsgi-安装配置">Django Nginx+uwsgi 安装配置</h3>
+
+<p>正式发布的服务，需要一个可以稳定而持续的服务器。</p>
+<h4 id="环境的搭建">环境的搭建</h4>
+<p><strong>基础开发环境配置</strong></p>
+
+<pre><code>yum groupinstall "Development tools"
+yum install zlib-devel bzip2-devel pcre-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel
+</code></pre>
+
+<p><strong>提前安装好python3环境</strong>
+https://www.cnblogs.com/yyyyyyyyyy/p/9463387.html</p>
+
+<p><strong>virtualenv</strong></p>
+
+<p>请确保你的虚拟环境正常工作
+http://blog.pythoner.world/2018/08/30/Virtualenv/</p>
+
+<p><strong>安装django1.11</strong></p>
+
+<pre><code>pip3 install django==1.11
+</code></pre>
+
+<p><strong>创建django项目mysite</strong></p>
+
+<pre><code>django-admin startproject mysite **创建app01**
+
+python3 manage.py startapp app01
+mysite/settings.py
+</code></pre>
+
+<p>settings.py 设置</p>
+
+<pre><code>ALLOWED_HOSTS = ['*']
+</code></pre>
+
+<p><strong>mysite/urls.py</strong></p>
+<pre><code class="language-python">from app01 import views
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+    url(r'^hello_django/', views.hello),
+]
+</code></pre>
+<p>views.py</p>
+<pre><code class="language-python">from django.shortcuts import render,HttpResponse
+def hello(request):
+    print('request is :',request)
+    return HttpResponse('django is ok ')
+</code></pre>
+<h3 id="安装uwsgi">安装uWSGI</h3>
+<p><strong>进入虚拟环境venv，安装uwsgi</strong></p>
+
+<pre><code>(venv) [root@slave 192.168.11.64 /opt]$pip3 install uwsgi
+检查uwsgi版本
+(venv) [root@slave 192.168.11.64 /opt]$uwsgi --version
+2.0.17.1 **检查uwsgi python版本**
+
+uwsgi --python-version
+</code></pre>
+
+<p><strong>运行简单的uWSGI</strong>
+启动一个python</p>
+
+<pre><code>uwsgi --http :8000 --wsgi-file test.py
+http :8000: 使用http协议，端口8000
+wsgi-file test.py: 加载指定的文件，test.py test.py ```python def application(env, start_response):
+start_response('200 OK', [('Content-Type','text/html')])
+return [b"Hello World"] # python3 ``` ### uWsgi热加载python程序
+</code></pre>
+
+<p><strong>在启动命令后面加上参数</strong></p>
+
+<pre><code>uwsgi --http :8088 --module mysite.wsgi --py-autoreload=1  **发布命令**
+
+command= /home/venv/bin/uwsgi --uwsgi 0.0.0.0:8000 --chdir /opt/mysite --home=/home/venv --module mysite.wsgi
+#此时修改django代码，uWSGI会自动加载django程序，页面生效
+</code></pre>
+
+<p><strong>运行django程序</strong></p>
+
+<pre><code>#mysite/wsgi.py  确保找到这个文件
+uwsgi --http :8000 --module mysite.wsgi
+module mysite.wsgi: 加载指定的wsgi模块 **uwsgi配置文件**
+</code></pre>
+
+<p>uwsgi.ini
+指定配置文件启动命令</p>
+
+<pre><code>uwsgi --ini  /etc/uwsgi_nginx.ini **配置nginx结合uWSGI**
+
+配置nginx.conf ``` worker_processes  1; error_log  logs/error.log; pid        logs/nginx.pid; events {
+worker_connections  1024; } http {
+include       mime.types;
+default_type  application/octet-stream;
+log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" "$http_x_forwarded_for"';
+access_log  logs/access.log  main;
+sendfile        on;
+keepalive_timeout  65; 　　　#nginx反向代理uwsgi
+server {
+    listen       80;
+    server_name  192.168.11.64;
+    location / {
+     include  /opt/nginx1-12/conf/uwsgi_params;
+     uwsgi_pass 0.0.0.0:8000;
+        root   html;
+        index  index.html index.htm;
+    } 　　　　  #nginx处理静态页面资源 　　　　  location /static{ 　　　　　　　　alias /opt/nginx1-12/static;　　　
+     } 　　　　　#nginx处理媒体资源 　　　　　location /media{ 　　　　　　　　alias /opt/nginx1-12/media;　　　
+     }
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   html;
+    }
+} } ``` 配置完启动nginx
+</code></pre>
+
+<h3 id="supervisor">supervisor</h3>
+<blockquote>
+  <p>supervisor 是基于 python 的任务管理工具，用来自动运行各种后台任务，当然你也能直接利用 nohup 命令使任务自动后台运行，但如果要重启任务，每次都自己手动 kill 掉任务进程，这样很繁琐，而且一旦程序错误导致进程退出的话，系统也无法自动重载任务。</p>
+</blockquote>
+
+<p>这里要配置基于virtualenv的supervisor</p>
+
+<p>由于supervisor在python3下无法使用，因此只能用python2去下载！！！！！！</p>
+
+<p><strong>注意此时已经退出虚拟环境了！！！！！</strong></p>
+
+<pre><code>yum install python-setuptools
+easy_install supervisor
+</code></pre>
+
+<p>通过命令生成supervisor的配支文件</p>
+
+<pre><code>echo_supervisord_conf &gt; /etc/supervisord.conf
+然后再/etc/supervisord.conf末尾添加上如下代码！！！！！！
+</code></pre>
+
+<pre><code>[program:my]
+#command=/opt/venv/bin/uwsgi --ini  /etc/uwsgi_nginx.ini  #这里是结合virtualenv的命令 和supervisor的精髓！！！！
+command= /home/venv/bin/uwsgi --uwsgi 0.0.0.0:8000 --chdir /opt/mysite --home=/home/venv --module mysite.wsgi
+#--home指的是虚拟环境目录  --module找到 mysite/wsgi.py
+
+directory=/opt/mysite
+startsecs=0
+stopwaitsecs=0
+autostart=true
+autorestart=true
+</code></pre>
+<p>最后启动supervisor，完成uWSGI启动django，nginx反向代理</p>
+
+<pre><code>supervisord -c /etc/supervisord.conf #启动supervisor
+supervisorctl -c /etxc/supervisord.conf restart my  #重启my项目
+supervisorctl -c /etc/supervisord.conf [start|stop|restart] [program-name|all] **重新加载supervisor**
+
+一、添加好配置文件后
+
+二、更新新的配置到supervisord    
+
+supervisorctl update
+三、重新启动配置中的所有程序
+
+supervisorctl reload
+四、启动某个进程(program_name=你配置中写的程序名称)
+
+supervisorctl start program_name    
+五、查看正在守候的进程
+
+supervisorctl
+六、停止某一进程 (program_name=你配置中写的程序名称)
+
+pervisorctl stop program_name
+七、重启某一进程 (program_name=你配置中写的程序名称)
+
+supervisorctl restart program_name
+八、停止全部进程
+
+supervisorctl stop all
+注意：显示用stop停止掉的进程，用reload或者update都不会自动重启。
+</code></pre>
+
+<h3 id="django的静态文件与nginx配置">django的静态文件与nginx配置</h3>
+
+<p><strong>mysite/settings.py</strong></p>
+
+<pre><code>STATIC_ROOT='/opt/nginx1-12/static'
+STATIC_URL = '/static/'
+STATICFILES_DIRS=[
+    os.path.join(BASE_DIR,"static"),
+]
+上述的参数STATIC_ROOT用在哪？
+
+通过python3 manage.py collectstatic 收集所有你使用的静态文件保存到STATIC_ROOT！
+</code></pre>
+
+<p><strong>STATIC_ROOT 文件夹</strong></p>
+
+<p>是用来将所有STATICFILES_DIRS中所有文件夹中的文件，以及各app中static中的文件都复制过来
+把这些文件放到一起是为了用nginx等部署的时候更方便</p>
+
+
+                <hr style="visibility: hidden;">
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2018/09/15/jekyll-teach/" data-toggle="tooltip" data-placement="top" title="Jekyll+Github搭建博客教程">
+                        Previous<br>
+                        <span>Jekyll+Github搭建博客教程</span>
+                        </a>
+                    </li>
+                    
+                    
+                </ul>
+
+
+                
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread"></div>
+                </div>
+                <!-- disqus 评论框 end -->
+                
+
+                
+            </div>  
+
+    <!-- Side Catalog Container -->
+        
+            <div class="
+                col-lg-2 col-lg-offset-0
+                visible-lg-block
+                sidebar-container
+                catalog-container">
+                <div class="side-catalog">
+                    <hr class="hidden-sm hidden-xs">
+                    <h5>
+                        <a class="catalog-toggle" href="#">CATALOG</a>
+                    </h5>
+                    <ul class="catalog-body"></ul>
+                </div>
+            </div>
+        
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#生活" title="生活" rel="1">
+                                    生活
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Jekyll" title="Jekyll" rel="1">
+                                    Jekyll
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Linux" title="Linux" rel="1">
+                                    Linux
+                                </a>
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "hux";
+    var disqus_identifier = "/2018/09/20/uwsgi-nginx";
+    var disqus_url = "http://localhost:4000/2018/09/20/uwsgi-nginx/";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                <!--     
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                     -->
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    <!--  -->
+                    <!-- <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/Yuan_Yong">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li> -->
+                    <!--  -->
+                <!--      -->
+
+
+                    
+                    
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Yuan Blog 2020
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="100px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<!-- Currently, only navbar scroll-down effect at desktop still depends on this -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+<!-- Service Worker -->
+
+<script src="/js/snackbar.js "></script>
+<script src="/js/sw-registration.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!--
+     Because of the native support for backtick-style fenced code blocks
+     right within the Markdown is landed in Github Pages,
+     From V1.6, There is no need for Highlight.js,
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/
+     - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async('/js/jquery.tagcloud.js',function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+<!--  -->
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = '3763a194913a4b8e1d2c1a6aebc4e7f7';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Side Catalog -->
+
+<script type="text/javascript">
+    function generateCatalog (selector) {
+
+        // interop with multilangual 
+        if ('' == 'true') {
+            _containerSelector = 'div.post-container.active'
+        } else {
+            _containerSelector = 'div.post-container'
+        }
+
+        // init
+        var P = $(_containerSelector),a,n,t,l,i,c;
+        a = P.find('h1,h2,h3,h4,h5,h6');
+
+        // clean
+        $(selector).html('')
+
+        // appending
+        a.each(function () {
+            n = $(this).prop('tagName').toLowerCase();
+            i = "#"+$(this).prop('id');
+            t = $(this).text();
+            c = $('<a href="'+i+'" rel="nofollow">'+t+'</a>');
+            l = $('<li class="'+n+'_nav"></li>').append(c);
+            $(selector).append(l);
+        });
+        return true;
+    }
+
+    generateCatalog(".catalog-body");
+
+    // toggle side catalog
+    $(".catalog-toggle").click((function(e){
+        e.preventDefault();
+        $('.side-catalog').toggleClass("fold")
+    }))
+
+    /*
+     * Doc: https://github.com/davist11/jQuery-One-Page-Nav
+     * Fork by Hux to support padding
+     */
+    async("/js/jquery.nav.js", function () {
+        $('.catalog-body').onePageNav({
+            currentClass: "active",
+            changeHash: !1,
+            easing: "swing",
+            filter: "",
+            scrollSpeed: 700,
+            scrollOffset: 0,
+            scrollThreshold: .2,
+            begin: null,
+            end: null,
+            scrollChange: null,
+            padding: 80
+        });
+    });
+</script>
+
+
+
+<!-- Multi-Lingual -->
+
+
+
+
+<!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
