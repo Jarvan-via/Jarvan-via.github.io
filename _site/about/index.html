@@ -7,9 +7,22 @@
     <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="这里是 @Yuan的博客,与你一起发现更大的世界。">
-    <meta name="keywords"  content="袁勇, Yuan, 个人博客, 个人网站, 互联网, Web, JavaScript">
+    <meta name="keywords" content="袁勇, Yuan, 个人博客, 个人网站, 互联网, Web, JavaScript">
     <meta name="theme-color" content="#000000">
-    
+
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?b9b5dc76ff91740e1aa57ce1ea573437";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+
+
+    </script>
+
     <title>About - 阿袁的博客 | Yuan Blog</title>
 
     <!-- Web App Manifest -->
@@ -17,7 +30,7 @@
 
     <!-- Favicon -->
     <link rel="shortcut icon" href="/img/ifavicon.ico">
-    
+
     <!-- Canonical URL -->
     <link rel="canonical" href="http://localhost:4000/about/">
 
@@ -33,7 +46,8 @@
     <!-- Custom Fonts -->
     <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
     <!-- Hux change font-awesome CDN to qiniu -->
-    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet"
+        type="text/css">
 
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -49,165 +63,166 @@
 
 
 <!-- hack iOS CSS :active style -->
+
 <body ontouchstart="">
 
     <!-- Navigation -->
-<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
-    <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header page-scroll">
-            <button type="button" class="navbar-toggle">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">Yuan Blog</a>
-        </div>
-
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div id="huxblog_navbar">
-            <div class="navbar-collapse">
-                <ul class="nav navbar-nav navbar-right">
-                    <li>
-                        <a href="/">Home</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/about/">About</a>
-                    </li>
-                    
-                    <li>
-                        <a href="/tags/">Tags</a>
-                    </li>
-                    
-                </ul>
+    <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Yuan Blog</a>
             </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div id="huxblog_navbar">
+                <div class="navbar-collapse">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="/">Home</a>
+                        </li>
+
+                        <li>
+                            <a href="/about/">About</a>
+                        </li>
+
+                        <li>
+                            <a href="/tags/">Tags</a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+            <!-- /.navbar-collapse -->
         </div>
-        <!-- /.navbar-collapse -->
-    </div>
-    <!-- /.container -->
-</nav>
-<script>
-    // Drop Bootstarp low-performance Navbar
-    // Use customize navbar with high-quality material design animation
-    // in high-perf jank-free CSS3 implementation
-    var $body   = document.body;
-    var $toggle = document.querySelector('.navbar-toggle');
-    var $navbar = document.querySelector('#huxblog_navbar');
-    var $collapse = document.querySelector('.navbar-collapse');
+        <!-- /.container -->
+    </nav>
+    <script>
+        // Drop Bootstarp low-performance Navbar
+        // Use customize navbar with high-quality material design animation
+        // in high-perf jank-free CSS3 implementation
+        var $body = document.body;
+        var $toggle = document.querySelector('.navbar-toggle');
+        var $navbar = document.querySelector('#huxblog_navbar');
+        var $collapse = document.querySelector('.navbar-collapse');
 
-    var __HuxNav__ = {
-        close: function(){
-            $navbar.className = " ";
-            // wait until animation end.
-            setTimeout(function(){
-                // prevent frequently toggle
-                if($navbar.className.indexOf('in') < 0) {
-                    $collapse.style.height = "0px"
-                }
-            },400)
-        },
-        open: function(){
-            $collapse.style.height = "auto"
-            $navbar.className += " in";
+        var __HuxNav__ = {
+            close: function () {
+                $navbar.className = " ";
+                // wait until animation end.
+                setTimeout(function () {
+                    // prevent frequently toggle
+                    if ($navbar.className.indexOf('in') < 0) {
+                        $collapse.style.height = "0px"
+                    }
+                }, 400)
+            },
+            open: function () {
+                $collapse.style.height = "auto"
+                $navbar.className += " in";
+            }
         }
-    }
 
-    // Bind Event
-    $toggle.addEventListener('click', function(e){
-        if ($navbar.className.indexOf('in') > 0) {
-            __HuxNav__.close()
-        }else{
-            __HuxNav__.open()
-        }
-    })
+        // Bind Event
+        $toggle.addEventListener('click', function (e) {
+            if ($navbar.className.indexOf('in') > 0) {
+                __HuxNav__.close()
+            } else {
+                __HuxNav__.open()
+            }
+        })
 
-    /**
-     * Since Fastclick is used to delegate 'touchstart' globally
-     * to hack 300ms delay in iOS by performing a fake 'click',
-     * Using 'e.stopPropagation' to stop 'touchstart' event from 
-     * $toggle/$collapse will break global delegation.
-     * 
-     * Instead, we use a 'e.target' filter to prevent handler
-     * added to document close HuxNav.  
-     *
-     * Also, we use 'click' instead of 'touchstart' as compromise
-     */
-    document.addEventListener('click', function(e){
-        if(e.target == $toggle) return;
-        if(e.target.className == 'icon-bar') return;
-        __HuxNav__.close();
-    })
-</script>
+        /**
+         * Since Fastclick is used to delegate 'touchstart' globally
+         * to hack 300ms delay in iOS by performing a fake 'click',
+         * Using 'e.stopPropagation' to stop 'touchstart' event from 
+         * $toggle/$collapse will break global delegation.
+         * 
+         * Instead, we use a 'e.target' filter to prevent handler
+         * added to document close HuxNav.  
+         *
+         * Also, we use 'click' instead of 'touchstart' as compromise
+         */
+        document.addEventListener('click', function (e) {
+            if (e.target == $toggle) return;
+            if (e.target.className == 'icon-bar') return;
+            __HuxNav__.close();
+        })
+    </script>
 
 
     <!-- Page Header -->
-<header class="intro-header" style="background-image: url('/img/about-bg.jpg')">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
-                <div class="site-heading">
-                    <h1>About</h1>
-                    <!--<hr class="small">-->
-                    <span class="subheading">你是我的梦想</span>
+    <header class="intro-header" style="background-image: url('/img/about-bg.jpg')">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
+                    <div class="site-heading">
+                        <h1>About</h1>
+                        <!--<hr class="small">-->
+                        <span class="subheading">你是我的梦想</span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-        
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
 
-<!-- USE SIDEBAR -->
-    <!-- PostList Container -->
-    		<div class="
+
+            <!-- USE SIDEBAR -->
+            <!-- PostList Container -->
+            <div class="
                 col-lg-8 col-lg-offset-1
                 col-md-8 col-md-offset-1
                 col-sm-12
                 col-xs-12
                 postlist-container
             ">
-    			<!-- Chinese Version -->
-<div class="zh post-container">
-    
-    <blockquote>
-  <p>未完待续…..</p>
-</blockquote>
+                <!-- Chinese Version -->
+                <div class="zh post-container">
 
-</div> -->
+                    <blockquote>
+                        <p>未完待续…..</p>
+                    </blockquote>
 
-
-
-<!-- disqus 评论框 start -->
-<div class="comment">
-    <div id="disqus_thread" class="disqus-thread">
-
-    </div>
-</div>
-<!-- disqus 评论框 end -->
-
-<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
-<script type="text/javascript">
-    /* * * CONFIGURATION VARIABLES * * */
-    var disqus_shortname = "hux";
-    var disqus_identifier = "hux//about/";
-    var disqus_url = "http://localhost:4000/about/";
-
-    (function() {
-        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-    })();
-</script>
-<!-- disqus 公共JS代码 end -->
+                </div> -->
 
 
-    		</div>
-    <!-- Sidebar Container -->
+
+                <!-- disqus 评论框 start -->
+                <div class="comment">
+                    <div id="disqus_thread" class="disqus-thread">
+
+                    </div>
+                </div>
+                <!-- disqus 评论框 end -->
+
+                <!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+                <script type="text/javascript">
+                    /* * * CONFIGURATION VARIABLES * * */
+                    var disqus_shortname = "hux";
+                    var disqus_identifier = "hux//about/";
+                    var disqus_url = "http://localhost:4000/about/";
+
+                    (function () {
+                        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                    })();
+                </script>
+                <!-- disqus 公共JS代码 end -->
+
+
+            </div>
+            <!-- Sidebar Container -->
             <div class="
                 col-lg-3 col-lg-offset-0
                 col-md-3 col-md-offset-0
@@ -216,47 +231,48 @@
                 sidebar-container
             ">
                 <!-- Featured Tags -->
-                
+
                 <section>
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
-                        
-                            
-                                <a href="/tags/#生活" title="生活" rel="1">
-                                    生活
-                                </a>
-                            
-                        
-                            
-                                <a href="/tags/#Jekyll" title="Jekyll" rel="1">
-                                    Jekyll
-                                </a>
-                            
-                        
-                            
-                                <a href="/tags/#Linux" title="Linux" rel="1">
-                                    Linux
-                                </a>
-                            
-                        
+
+
+                        <a href="/tags/#生活" title="生活" rel="1">
+                            生活
+                        </a>
+
+
+
+                        <a href="/tags/#Jekyll" title="Jekyll" rel="1">
+                            Jekyll
+                        </a>
+
+
+
+                        <a href="/tags/#Linux" title="Linux" rel="1">
+                            Linux
+                        </a>
+
+
                     </div>
                 </section>
-                
+
 
                 <!-- Short About -->
                 <section class="visible-md visible-lg">
-                    <hr><h5><a href="/about/">ABOUT ME</a></h5>
+                    <hr>
+                    <h5><a href="/about/">ABOUT ME</a></h5>
                     <div class="short-about">
-                        
-                            <img src="/img/avatar-yy.jpg" />
-                        
-                        
-                            <p>人生难得是欢聚，惟有别离多</p>
-                        
+
+                        <img src="/img/avatar-yy.jpg" />
+
+
+                        <p>人生难得是欢聚，惟有别离多</p>
+
                         <!-- SNS Link -->
                         <ul class="list-inline">
-                            
+
                             <li>
                                 <a href="https://www.cnblogs.com/yyyyyyyyyy/">
                                     <span class="fa-stack fa-lg">
@@ -265,9 +281,9 @@
                                     </span>
                                 </a>
                             </li>
-                            
-                            
-                            
+
+
+
                             <li>
                                 <a target="_blank" href="https://www.zhihu.com/people/Yuan_Yong">
                                     <span class="fa-stack fa-lg">
@@ -276,9 +292,9 @@
                                     </span>
                                 </a>
                             </li>
-                            
-                          
-                              <!-- 这行是我自己的微博账号  -->
+
+
+                            <!-- 这行是我自己的微博账号  -->
                             <li>
                                 <a target="_blank" href="https://weibo.com/5749174324/profile?topnav=1&wvr=6">
                                     <span class="fa-stack fa-lg">
@@ -287,8 +303,8 @@
                                     </span>
                                 </a>
                             </li>
-                    
-                            
+
+
                             <!-- 这行是我自己的Github账号  为了而保留原作者的账号而 去掉了if判断 -->
                             <li>
                                 <a target="_blank" href="https://github.com/qq446506536">
@@ -298,33 +314,33 @@
                                     </span>
                                 </a>
                             </li>
-                        
-                            
-                             
+
+
+
                         </ul>
                     </div>
                 </section>
                 <!-- Friends Blog -->
-                
+
                 <hr>
                 <h5>FRIENDS</h5>
                 <ul class="list-inline">
-                    
+
                 </ul>
-                
-    		</div>
-        
-	</div>
-</div>
+
+            </div>
+
+        </div>
+    </div>
 
 
     <!-- Footer -->
-<footer>
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
-                <ul class="list-inline text-center">
-                <!--     
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                    <ul class="list-inline text-center">
+                        <!--     
                     <li>
                         <a href="/feed.xml">
                             <span class="fa-stack fa-lg">
@@ -334,11 +350,11 @@
                         </a>
                     </li>
                      -->
-                    
 
-                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
-                    <!--  -->
-                    <!-- <li>
+
+                        <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                        <!--  -->
+                        <!-- <li>
                         <a target="_blank" href="https://www.zhihu.com/people/Yuan_Yong">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
@@ -346,58 +362,57 @@
                             </span>
                         </a>
                     </li> -->
-                    <!--  -->
-                <!--      -->
+                        <!--  -->
+                        <!--      -->
 
 
-                    
-                    
-                    
-                </ul>
-                <p class="copyright text-muted">
-                    Copyright &copy; Yuan Blog 2020
-                    <br>
-                    Theme by <a href="http://huangxuan.me">Hux</a> |
-                    <iframe
-                        style="margin-left: 2px; margin-bottom:-5px;"
-                        frameborder="0" scrolling="0" width="100px" height="20px"
-                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
-                    </iframe>
-                </p>
+
+
+
+                    </ul>
+                    <p class="copyright text-muted">
+                        Copyright &copy; Yuan Blog 2020
+                        <br>
+                        Theme by <a href="http://huangxuan.me">Hux</a> |
+                        <iframe style="margin-left: 2px; margin-bottom:-5px;" frameborder="0" scrolling="0"
+                            width="100px" height="20px"
+                            src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true">
+                        </iframe>
+                    </p>
+                </div>
             </div>
         </div>
-    </div>
-</footer>
+    </footer>
 
-<!-- jQuery -->
-<script src="/js/jquery.min.js "></script>
+    <!-- jQuery -->
+    <script src="/js/jquery.min.js "></script>
 
-<!-- Bootstrap Core JavaScript -->
-<!-- Currently, only navbar scroll-down effect at desktop still depends on this -->
-<script src="/js/bootstrap.min.js "></script>
+    <!-- Bootstrap Core JavaScript -->
+    <!-- Currently, only navbar scroll-down effect at desktop still depends on this -->
+    <script src="/js/bootstrap.min.js "></script>
 
-<!-- Custom Theme JavaScript -->
-<script src="/js/hux-blog.min.js "></script>
+    <!-- Custom Theme JavaScript -->
+    <script src="/js/hux-blog.min.js "></script>
 
-<!-- Service Worker -->
+    <!-- Service Worker -->
 
-<script src="/js/snackbar.js "></script>
-<script src="/js/sw-registration.js "></script>
+    <script src="/js/snackbar.js "></script>
+    <script src="/js/sw-registration.js "></script>
 
 
-<!-- async load function -->
-<script>
-    function async(u, c) {
-      var d = document, t = 'script',
-          o = d.createElement(t),
-          s = d.getElementsByTagName(t)[0];
-      o.src = u;
-      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
-      s.parentNode.insertBefore(o, s);
-    }
-</script>
+    <!-- async load function -->
+    <script>
+        function async(u, c) {
+            var d = document, t = 'script',
+                o = d.createElement(t),
+                s = d.getElementsByTagName(t)[0];
+            o.src = u;
+            if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+            s.parentNode.insertBefore(o, s);
+        }
+    </script>
 
-<!--
+    <!--
      Because of the native support for backtick-style fenced code blocks
      right within the Markdown is landed in Github Pages,
      From V1.6, There is no need for Highlight.js,
@@ -407,7 +422,7 @@
      - https://help.github.com/articles/creating-and-highlighting-code-blocks/
      - https://github.com/jneen/rouge/wiki/list-of-supported-languages-and-lexers
 -->
-<!--
+    <!--
     <script>
         async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
             hljs.initHighlightingOnLoad();
@@ -417,113 +432,113 @@
 -->
 
 
-<!-- jquery.tagcloud.js -->
-<script>
-    // only load tagcloud.js in tag.html
-    if($('#tag_cloud').length !== 0){
-        async('/js/jquery.tagcloud.js',function(){
-            $.fn.tagcloud.defaults = {
-                //size: {start: 1, end: 1, unit: 'em'},
-                color: {start: '#bbbbee', end: '#0085a1'},
-            };
-            $('#tag_cloud a').tagcloud();
+    <!-- jquery.tagcloud.js -->
+    <script>
+        // only load tagcloud.js in tag.html
+        if ($('#tag_cloud').length !== 0) {
+            async('/js/jquery.tagcloud.js', function () {
+                $.fn.tagcloud.defaults = {
+                    //size: {start: 1, end: 1, unit: 'em'},
+                    color: { start: '#bbbbee', end: '#0085a1' },
+                };
+                $('#tag_cloud a').tagcloud();
+            })
+        }
+    </script>
+
+    <!--fastClick.js -->
+    <script>
+        async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function () {
+            var $nav = document.querySelector("nav");
+            if ($nav) FastClick.attach($nav);
         })
-    }
-</script>
-
-<!--fastClick.js -->
-<script>
-    async("//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js", function(){
-        var $nav = document.querySelector("nav");
-        if($nav) FastClick.attach($nav);
-    })
-</script>
+    </script>
 
 
-<!-- Google Analytics -->
-<!--  -->
+    <!-- Google Analytics -->
+    <!--  -->
 
 
-<!-- Baidu Tongji -->
+    <!-- Baidu Tongji -->
 
-<script>
-    // dynamic User by Hux
-    var _baId = '3763a194913a4b8e1d2c1a6aebc4e7f7';
+    <script>
+        // dynamic User by Hux
+        var _baId = '3763a194913a4b8e1d2c1a6aebc4e7f7';
 
-    // Originial
-    var _hmt = _hmt || [];
-    (function() {
-      var hm = document.createElement("script");
-      hm.src = "//hm.baidu.com/hm.js?" + _baId;
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    })();
-</script>
+        // Originial
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "//hm.baidu.com/hm.js?" + _baId;
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
 
 
 
 
-<!-- Side Catalog -->
+    <!-- Side Catalog -->
 
 
 
-<!-- Multi-Lingual -->
+    <!-- Multi-Lingual -->
 
-<!-- Handle Language Change -->
-<script type="text/javascript">
-    // get nodes
-    var $zh = document.querySelector(".zh");
-    var $en = document.querySelector(".en");
-    var $select = document.querySelector("select");
+    <!-- Handle Language Change -->
+    <script type="text/javascript">
+        // get nodes
+        var $zh = document.querySelector(".zh");
+        var $en = document.querySelector(".en");
+        var $select = document.querySelector("select");
 
-    // bind hashchange event
-    // Changes at v1.7.2: change the language flag from hash-basing to in-memory basing
-    // due to its confliction with catalog anchors.
-    // window.addEventListener('hashchange', _render);
+        // bind hashchange event
+        // Changes at v1.7.2: change the language flag from hash-basing to in-memory basing
+        // due to its confliction with catalog anchors.
+        // window.addEventListener('hashchange', _render);
 
-    // handle render
-    function _render(_hash){
-        var _hash = _hash || window.location.hash;
-        // en
-        if(_hash == "#en"){
-            $select.selectedIndex = 1;
-            $en.style.display = "block";
-            $en.classList.add("active");
-            $zh.style.display = "none";
-            $zh.classList.remove("active");
-        // zh by default
-        }else{
-            // not trigger onChange, otherwise cause a loop call.
-            $select.selectedIndex = 0;
-            $zh.style.display = "block";
-            $zh.classList.add("active");
-            $en.style.display = "none";
-            $en.classList.remove("active");
+        // handle render
+        function _render(_hash) {
+            var _hash = _hash || window.location.hash;
+            // en
+            if (_hash == "#en") {
+                $select.selectedIndex = 1;
+                $en.style.display = "block";
+                $en.classList.add("active");
+                $zh.style.display = "none";
+                $zh.classList.remove("active");
+                // zh by default
+            } else {
+                // not trigger onChange, otherwise cause a loop call.
+                $select.selectedIndex = 0;
+                $zh.style.display = "block";
+                $zh.classList.add("active");
+                $en.style.display = "none";
+                $en.classList.remove("active");
+            }
+            // interop with catalog 
+            if ("") generateCatalog(".catalog-body");
         }
-        // interop with catalog 
-        if ("") generateCatalog(".catalog-body");
-    }
 
-    // handle select change
-    function onLanChange(index){
-        if(index == 0){
-            _hash = "#zh"
-        }else{
-            _hash = "#en"
+        // handle select change
+        function onLanChange(index) {
+            if (index == 0) {
+                _hash = "#zh"
+            } else {
+                _hash = "#en"
+            }
+            _render(_hash)
         }
-        _render(_hash)
-    }
 
-    // init
-    _render();
-</script>
+        // init
+        _render();
+    </script>
 
 
 
 
-<!-- Image to hack wechat -->
-<!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
-<!-- Migrate from head to bottom, no longer block render and still work -->
+    <!-- Image to hack wechat -->
+    <!-- <img src="/img/icon_wechat.png" width="0" height="0" /> -->
+    <!-- Migrate from head to bottom, no longer block render and still work -->
 
 </body>
 
