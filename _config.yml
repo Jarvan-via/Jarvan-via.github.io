@@ -74,7 +74,7 @@ ba_track_id: 'b9b5dc76ff91740e1aa57ce1ea573437'
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "人生难得是欢聚，惟有别离多"
-sidebar-avatar: /img/avatar-yy.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/avatar.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
